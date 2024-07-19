@@ -33,15 +33,18 @@ body {
 }
 
 .box {
-  width: 100px;
-  height: 100px;
+  width: 75px;
+  height: 75px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  background-color: var(--green);
   font-weight: 600;
-  margin: 10px;
+  color: var(--dark);
+  line-height: 1.2;
+  will-change: transform;
 }
 
 .boxClick {
@@ -54,4 +57,71 @@ body {
   text-align: center;
   font-weight: 600;
   margin: 10px;
+}
+
+.st0 {
+  fill:none;
+  stroke:red;
+  stroke-width:10;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-miterlimit:10;
+}
+
+.motionSVG {
+  width: 100px;
+  height: 100px;
+  margin: 10px;
+}
+
+.motionPath {
+  fill:none;
+  stroke:red;
+  stroke-width:10;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-miterlimit:10;
+}
+
+.tractor {
+  /* display: relative; */
+  /* top: 4rem; */
+}
+
+
+.gradient-blue {
+  background: var(--color-ui-gradient),
+    url('https://gsap.com/_img/codepen/flair/noise.png'); /* Replace with the path to your noise texture image */
+  background-blend-mode: color-dodge; /* Blend the noise texture with the gradient */
+}
+
+.section {
+  width: 100%;
+  height: 100vh;
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.column {
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.boxes-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.panel {
+  height: 100vh;
+  position: sticky;
+  top: 0;
 }

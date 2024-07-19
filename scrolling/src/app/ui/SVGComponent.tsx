@@ -1,7 +1,12 @@
 import * as React from "react";
+import { MutableRefObject } from "react";
 
 interface PropsSvg {
   className?: string
+  container?: MutableRefObject<null>
+  motionSVG?: MutableRefObject<null>
+  tractor?: MutableRefObject<null>
+  motionPath?: MutableRefObject<null>
 }
 
 const SVGComponent = (props: PropsSvg) => (
@@ -17,16 +22,17 @@ const SVGComponent = (props: PropsSvg) => (
   >
     <style type="text/css">
       {
-        "\n            .st0{fill:none;stroke:red;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}\n        "
+        "\n            .st0{fill:none;stroke:red;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}\n "
       }
     </style>
     <path
       id="motionPath"
-      className="st0"
+      ref={props.motionPath}
+      className="motionPath"
       d="M155.395,383.31 C152.773,390.548 92.401,646.162 250.215,727.041 453.479,831.213 835.629,715.412 832.33,924.268 830.006,1071.385 20.339,1040.965 22.58,1206.204 24.517,1348.994 835.125,1320.378 832.275,1445.504 827.175,1669.362 57.235,1623.348 56.673,1760.63 55.674,2004.272 837.157,1936.609 837.205,2053.845 837.283,2246.807 137.92199,2252.96102 137.92199,2252.96102 "
     />
-    <g id="motionSVG">
-      <g id="tractor">
+    <g id="motionSVG" ref={props.motionSVG} className='motionSVG'>
+      <g id="tractor" ref={props.tractor} className='tractor'>
         <path
           id="Vector"
           d="M30.4786 2.37109C30.1944 1.6945 28.2463 1.46897 26.5629 1.44392L26.561 1.44147C26.5079 1.44147 26.4533 1.44228 26.3993 1.4427C26.3456 1.44228 26.2909 1.44147 26.2378 1.44147L26.2359 1.44392C24.5526 1.46897 22.6045 1.6945 22.3202 2.37109C22.0174 3.09168 22.0406 4.97436 22.46 5.53219C22.46 5.53219 23.2008 6.28613 26.0526 6.36144C26.1275 6.3654 26.2033 6.36894 26.2845 6.36894C26.3247 6.36894 26.36 6.3673 26.3993 6.36705C26.4388 6.3673 26.4742 6.36894 26.5143 6.36894C26.5955 6.36894 26.6713 6.3654 26.7463 6.36144C29.5982 6.28613 30.3388 5.53219 30.3388 5.53219C30.7582 4.97436 30.7814 3.09168 30.4786 2.37109Z"
