@@ -1,0 +1,26 @@
+[
+  {
+    "image": "https://blog.saveonfoods.com/wp-content/uploads/sof-hp/hp-icons/bakery.png",
+    "title": "Bakery"
+  },
+  {
+    "image": "https://blog.saveonfoods.com/wp-content/uploads/sof-hp/hp-icons/fruits-vegetables.png",
+    "title": "Fruits & Vegetables"
+  },
+  {
+    "image": "https://blog.saveonfoods.com/wp-content/uploads/sof-hp/hp-icons/meat-seafood.png",
+    "title": " Meat & Seafood"
+  },
+  {
+    "image": "https://blog.saveonfoods.com/wp-content/uploads/sof-hp/hp-icons/dairy-eggs.png",
+    "title": "Dairy & Eggs"
+  },
+  {
+    "image": "https://blog.saveonfoods.com/wp-content/uploads/sof-hp/hp-icons/deli.png",
+    "title": "Deli & Ready Made Meals"
+  },
+  {
+    "image": "https://blog.saveonfoods.com/wp-content/uploads/sof-hp/hp-icons/pantry.png",
+    "title": "Pantry"
+  }
+]
