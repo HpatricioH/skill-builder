@@ -1,0 +1,5 @@
+[
+    {"name": "milk", "quantity": 2, "unit": "liters"},
+    {"name": "eggs", "quantity": 12, "unit": "pieces"},
+    {"name": "apples", "quantity": 5, "unit": "pieces"}
+]
