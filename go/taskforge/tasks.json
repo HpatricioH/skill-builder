@@ -1,0 +1,14 @@
+[
+ {
+  "id": 1,
+  "title": "Buy milk",
+  "completed": false,
+  "created_at": "2026-02-04T23:40:06.8770465-05:00"
+ },
+ {
+  "id": 2,
+  "title": "Study Go slices",
+  "completed": false,
+  "created_at": "2026-02-04T23:40:09.3283622-05:00"
+ }
+]
