@@ -57,3 +57,16 @@ func (s *Service) ListTasks() []Task {
 	copy(out, s.tasks)
 	return out
 }
+
+func (s *Service) MarkDone(id int) error {
+	for i := range s.tasks {
+		if s.tasks[i].ID == id {
+			if s.tasks[i].Completed {
+				return errors.New("task is already completed")
+			}
+			s.tasks[i].Completed = true
+			return nil
+		}
+	}
+	return errors.New("task not found")
+}
