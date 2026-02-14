@@ -70,3 +70,16 @@ func (s *Service) MarkDone(id int) error {
 	}
 	return errors.New("task not found")
 }
+
+func (s *Service) DeleteTask(id int) error {
+	for i := range s.tasks {
+		if s.tasks[i].ID == id {
+			// Remove element at index i:
+			// - keep everything before i
+			// - append everything after i
+			s.tasks = append(s.tasks[:i], s.tasks[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("task not found")
+}

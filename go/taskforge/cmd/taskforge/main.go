@@ -91,6 +91,31 @@ func main() {
 
 		fmt.Printf("Marked task #%d as completed\n", id)
 
+	case "delete":
+		if len(args) < 2 {
+			fmt.Println("Missing task ID.")
+			printUsage()
+			os.Exit(1)
+		}
+
+		id, err := strconv.Atoi(args[1])
+		if err != nil {
+			fmt.Println("Invalid task ID:")
+			os.Exit(1)
+		}
+
+		if err := svc.DeleteTask(id); err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+
+		if err := store.Save(svc.ListTasks()); err != nil {
+			fmt.Println("Error saving tasks:", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Deleted task #%d\n", id)
+
 	default:
 		fmt.Printf("Unknown command: %s\n", args[0])
 		printUsage()
@@ -104,4 +129,5 @@ func printUsage() {
 	fmt.Println(" taskforge add <title>")
 	fmt.Println(" taskforge list")
 	fmt.Println(" taskforge done <id>")
+	fmt.Println(" taskforge delete <id>")
 }
