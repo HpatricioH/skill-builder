@@ -18,26 +18,20 @@ func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
 		printUsage()
-		os.Exit(1)
+		exitErr(nil, 1)
 	}
 
 	// Load tasks at the start of every run
 	existing, err := store.Load()
 	if err != nil {
-		fmt.Println("Error loading tasks:", err)
-		os.Exit(1)
+		exitErr(fmt.Errorf("loading tasks: %w", err), 1)
 	}
 
 	svc := task.NewService(existing)
 
 	switch args[0] {
 	case "add":
-		if len(args) < 2 {
-			fmt.Println("Missing task title.")
-			printUsage()
-			os.Exit(1)
-		}
-		title := strings.Join(args[1:], " ")
+		title := strings.TrimSpace(string.Join(args[1:], " "))
 		t, err := svc.AddTask(title)
 		if err != nil {
 			fmt.Println("Error:", err)
@@ -121,7 +115,6 @@ func main() {
 		printUsage()
 		os.Exit(1)
 	}
-
 }
 
 func printUsage() {
