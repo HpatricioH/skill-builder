@@ -31,19 +31,18 @@ func main() {
 
 	switch args[0] {
 	case "add":
-		title := strings.TrimSpace(string.Join(args[1:], " "))
+		title := strings.TrimSpace(strings.Join(args[1:], " "))
+		if title == "" {
+			exitErr(fmt.Errorf("missing task title"), 1)
+		}
+
 		t, err := svc.AddTask(title)
 		if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
+			exitErr(err, 1)
 		}
 
 		// save after changes
-		if err := store.Save(svc.ListTasks()); err != nil {
-			fmt.Println("Error saving tasks:", err)
-			os.Exit(1)
-		}
-
+		saveOrExit(store, svc)
 		fmt.Printf("Added: #%d %s\n", t.ID, t.Title)
 
 	case "list":
@@ -115,6 +114,19 @@ func main() {
 		printUsage()
 		os.Exit(1)
 	}
+}
+
+func saveOrExit(store *storage.FileStorage, svc *task.Service) {
+	if err := store.Save(svc.ListTasks()); err != nil {
+		exitErr(fmt.Errorf("saving tasks %w", err), 1)
+	}
+}
+
+func exitErr(err error, code int) {
+	if err != nil {
+		fmt.Fprint(os.Stderr, "Error:", err)
+	}
+	os.Exit(code)
 }
 
 func printUsage() {
