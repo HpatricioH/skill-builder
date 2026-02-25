@@ -46,79 +46,63 @@ func main() {
 		fmt.Printf("Added: #%d %s\n", t.ID, t.Title)
 
 	case "list":
-		tasks := svc.ListTasks()
-		if len(tasks) == 0 {
-			fmt.Println("No tasks yet.")
-			return
-		}
-		for _, t := range tasks {
-			status := " "
-			if t.Completed {
-				status = "x"
-			}
-			fmt.Printf("[%s] #%d %s\n", status, t.ID, t.Title)
-		}
+		printTasks(svc.ListTasks())
 
 	case "done":
-		if len(args) < 2 {
-			fmt.Println("Missing task ID.")
-			printUsage()
-			os.Exit(1)
-		}
-
-		id, err := strconv.Atoi(args[1])
-		if err != nil {
-			fmt.Println("Invalid task ID:")
-			os.Exit(1)
-		}
-
+		id := parseIDOrExit(args, 1)
 		if err := svc.MarkDone(id); err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
+			exitErr(err, 1)
 		}
 
-		if err := store.Save(svc.ListTasks()); err != nil {
-			fmt.Println("Error saving tasks:", err)
-			os.Exit(1)
-		}
-
+		saveOrExit(store, svc)
 		fmt.Printf("Marked task #%d as completed\n", id)
 
 	case "delete":
-		if len(args) < 2 {
-			fmt.Println("Missing task ID.")
-			printUsage()
-			os.Exit(1)
-		}
-
-		id, err := strconv.Atoi(args[1])
-		if err != nil {
-			fmt.Println("Invalid task ID:")
-			os.Exit(1)
-		}
-
+		id := parseIDOrExit(args, 1)
 		if err := svc.DeleteTask(id); err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
+			exitErr(err, 1)
 		}
 
-		if err := store.Save(svc.ListTasks()); err != nil {
-			fmt.Println("Error saving tasks:", err)
-			os.Exit(1)
-		}
-
+		saveOrExit(store, svc)
 		fmt.Printf("Deleted task #%d\n", id)
 
 	default:
-		fmt.Printf("Unknown command: %s\n", args[0])
 		printUsage()
-		os.Exit(1)
+		exitErr(fmt.Errorf("unknown command: %s", args[0]), 1)
 	}
+}
+
+func parseIDOrExit(args []string, index int) int {
+	if len(args) <= index {
+		printUsage()
+		exitErr(fmt.Errorf("missing task ID"), 1)
+	}
+
+	id, err := strconv.Atoi(args[index])
+	if err != nil || id <= 0 {
+		exitErr(fmt.Errorf("invalid task ID: %q", args[index]), 1)
+	}
+
+	return id
 }
 
 func saveOrExit(store *storage.FileStorage, svc *task.Service) {
 	if err := store.Save(svc.ListTasks()); err != nil {
 		exitErr(fmt.Errorf("saving tasks %w", err), 1)
+	}
+}
+
+func printTasks(tasks []task.Task) {
+	if len(tasks) == 0 {
+		fmt.Println("No tasks yet.")
+		return
+	}
+	for _, t := range tasks {
+		status := " "
+		if t.Completed {
+			status = "x"
+		}
+		fmt.Printf("[%s] #%d %s\n", status, t.ID, t.Title)
 	}
 }
 
