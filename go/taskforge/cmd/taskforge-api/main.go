@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	store := storage.NewFileStore(filepath.Join(".", "tasks.json"))
+	store := storage.NewFileStorage(filepath.Join(".", "tasks.json"))
 
 	existing, err := store.Load()
 	if err != nil {
