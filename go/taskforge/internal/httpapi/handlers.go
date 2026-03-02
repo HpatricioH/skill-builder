@@ -81,7 +81,14 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
-	id, ok := parseIDFromPath("id")
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+
+	if len(parts) != 2 || parts[0] != "tasks" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid path"})
+		return
+	}
+
+	id, ok := parseIDFromPath(parts[1])
 	if !ok {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid id"})
 		return

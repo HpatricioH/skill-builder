@@ -1,14 +1,8 @@
 [
  {
-  "id": 3,
-  "title": "New task",
-  "completed": true,
-  "created_at": "2026-02-13T22:43:17.2415621-05:00"
- },
- {
   "id": 4,
   "title": "Refactor CLI",
-  "completed": false,
+  "completed": true,
   "created_at": "2026-02-25T00:25:25.6035341-05:00"
  },
  {
