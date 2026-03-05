@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
 )
 
 type Handlers struct {
+	mu    sync.Mutex
 	svc   *task.Service
 	store *storage.FileStorage
 }
@@ -27,10 +29,16 @@ func (h *Handlers) save(w http.ResponseWriter) bool {
 }
 
 func (h *Handlers) handleListTasks(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	writeJSON(w, http.StatusOK, h.svc.ListTasks())
 }
 
 func (h *Handlers) handleCreateTask(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	var body struct {
 		Title string `json:"title"`
 	}
@@ -47,7 +55,8 @@ func (h *Handlers) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.save(w) {
+	if err := h.store.Save(h.svc.ListTasks()); err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to save tasks"})
 		return
 	}
 
@@ -55,6 +64,9 @@ func (h *Handlers) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	id, ok := parseIDFromPath(r.PathValue("id"))
 	if !ok {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid id"})
@@ -71,7 +83,8 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.save(w) {
+	if err := h.store.Save(h.svc.ListTasks()); err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to save tasks"})
 		return
 	}
 
@@ -81,6 +94,9 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 	if len(parts) != 2 || parts[0] != "tasks" {
@@ -99,7 +115,8 @@ func (h *Handlers) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.save(w) {
+	if err := h.store.Save(h.svc.ListTasks()); err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to save tasks"})
 		return
 	}
 
