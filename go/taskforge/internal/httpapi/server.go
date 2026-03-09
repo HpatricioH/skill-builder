@@ -12,6 +12,8 @@ func NewServer(svc *task.Service, store *storage.FileStorage) *http.ServeMux {
 
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /health", handleHealth)
+
 	// Collection routes
 	mux.HandleFunc("GET /tasks", h.handleListTasks)
 	mux.HandleFunc("POST /tasks", h.handleCreateTask)
@@ -28,4 +30,10 @@ func WithMiddleware(handler http.Handler) http.Handler {
 	handler = RequestIDMiddleware(handler)
 
 	return handler
+}
+
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]string{
+		"status": "ok",
+	})
 }
