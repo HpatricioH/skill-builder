@@ -23,10 +23,12 @@ func main() {
 	svc := task.NewService(existing)
 
 	mux := httpapi.NewServer(svc, store)
+	handler := httpapi.WithMiddleware(mux)
 
 	addr := ":8080"
 	fmt.Println("TaskForge API listening on", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
+
+	if err := http.ListenAndServe(addr, handler); err != nil {
 		fmt.Fprintln(os.Stderr, "Server error:", err)
 		os.Exit(1)
 	}

@@ -22,3 +22,10 @@ func NewServer(svc *task.Service, store *storage.FileStorage) *http.ServeMux {
 
 	return mux
 }
+
+func WithMiddleware(handler http.Handler) http.Handler {
+	handler = LoggingMiddleware(handler)
+	handler = RequestIDMiddleware(handler)
+
+	return handler
+}
