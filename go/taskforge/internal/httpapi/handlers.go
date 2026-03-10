@@ -18,6 +18,14 @@ type Handlers struct {
 	store *storage.FileStorage
 }
 
+type errorResponse struct {
+	Error string `json: "error"`
+}
+
+type messageRepsonse struct {
+	Message string `json: "message"`
+}
+
 func (h *Handlers) save(w http.ResponseWriter) bool {
 	if err := h.store.Save(h.svc.ListTasks()); err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
@@ -121,6 +129,24 @@ func (h *Handlers) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handlers) handleGetTaskByID(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	id, ok := parseIDFromPath(r.PathValue("id"))
+	if !ok {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid id"})
+		return
+	}
+
+	t, err := h.svc.GetTaskByID(id)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, t)
 }
 
 func parseIDFromPath(raw string) (int, bool) {

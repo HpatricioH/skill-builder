@@ -16,6 +16,7 @@ func NewServer(svc *task.Service, store *storage.FileStorage) *http.ServeMux {
 
 	// Collection routes
 	mux.HandleFunc("GET /tasks", h.handleListTasks)
+	mux.HandleFunc("GET /tasks/{id}", h.handleGetTaskByID)
 	mux.HandleFunc("POST /tasks", h.handleCreateTask)
 
 	// Item routes

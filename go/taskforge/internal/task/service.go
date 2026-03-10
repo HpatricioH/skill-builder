@@ -83,3 +83,12 @@ func (s *Service) DeleteTask(id int) error {
 	}
 	return errors.New("task not found")
 }
+
+func (s *Service) GetTaskByID(id int) (Task, error) {
+	for _, t := range s.tasks {
+		if t.ID == id {
+			return t, nil
+		}
+	}
+	return Task{}, errors.New("task not found")
+}
