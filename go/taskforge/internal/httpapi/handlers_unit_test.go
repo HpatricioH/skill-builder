@@ -107,8 +107,8 @@ func TestHandlers_Flow_Create_List_Done_Delete(t *testing.T) {
 
 		h.handleDeleteTask(rec, req)
 
-		if rec.Code != http.StatusNoContent {
-			t.Fatalf("DELETE status=%d want=%d body=%s", rec.Code, http.StatusNoContent, rec.Body.String())
+		if rec.Code != http.StatusOK {
+			t.Fatalf("DELETE status=%d want=%d body=%s", rec.Code, http.StatusOK, rec.Body.String())
 		}
 	}
 

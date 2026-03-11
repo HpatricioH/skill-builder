@@ -1,14 +1,20 @@
 [
-  {
-    "id": 4,
-    "title": "Refactor CLI",
-    "completed": true,
-    "created_at": "2026-02-25T00:25:25.6035341-05:00"
-  },
-  {
-    "id": 5,
-    "title": "Buy Milk",
-    "completed": false,
-    "created_at": "2026-02-26T23:20:54.6625113-05:00"
-  }
+ {
+  "id": 7,
+  "title": "Buy pan",
+  "completed": false,
+  "created_at": "2026-03-10T23:41:34.9162967-04:00"
+ },
+ {
+  "id": 8,
+  "title": "finish ARC tasks",
+  "completed": false,
+  "created_at": "2026-03-10T23:41:47.1521972-04:00"
+ },
+ {
+  "id": 9,
+  "title": "Buy Milk",
+  "completed": false,
+  "created_at": "2026-03-10T23:43:27.0610436-04:00"
+ }
 ]

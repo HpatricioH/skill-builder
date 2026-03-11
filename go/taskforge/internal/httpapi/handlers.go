@@ -22,7 +22,7 @@ type errorResponse struct {
 	Error string `json: "error"`
 }
 
-type messageRepsonse struct {
+type messageResponse struct {
 	Message string `json: "message"`
 }
 
@@ -52,19 +52,18 @@ func (h *Handlers) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid json"})
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid json"})
 		return
-
 	}
 
 	t, err := h.svc.AddTask(body.Title)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: err.Error()})
 		return
 	}
 
 	if err := h.store.Save(h.svc.ListTasks()); err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to save tasks"})
+		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to save tasks"})
 		return
 	}
 
@@ -77,7 +76,7 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 
 	id, ok := parseIDFromPath(r.PathValue("id"))
 	if !ok {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid id"})
 		return
 	}
 
@@ -87,17 +86,17 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(err.Error(), "already completed") {
 			code = http.StatusConflict
 		}
-		writeJSON(w, code, map[string]string{"error": err.Error()})
+		writeJSON(w, code, errorResponse{Error: err.Error()})
 		return
 	}
 
 	if err := h.store.Save(h.svc.ListTasks()); err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to save tasks"})
+		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to save tasks"})
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{
-		"message": fmt.Sprintf("task %d maked done", id),
+	writeJSON(w, http.StatusOK, messageResponse{
+		Message: fmt.Sprintf("task %d maked done", id),
 	})
 }
 
@@ -108,27 +107,29 @@ func (h *Handlers) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 	if len(parts) != 2 || parts[0] != "tasks" {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid path"})
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid path"})
 		return
 	}
 
 	id, ok := parseIDFromPath(parts[1])
 	if !ok {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid id"})
 		return
 	}
 
 	if err := h.svc.DeleteTask(id); err != nil {
-		writeJSON(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusNotFound, errorResponse{Error: err.Error()})
 		return
 	}
 
 	if err := h.store.Save(h.svc.ListTasks()); err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to save tasks"})
+		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to save tasks"})
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	writeJSON(w, http.StatusOK, messageResponse{
+		Message: fmt.Sprintf("task %d deleted", id),
+	})
 }
 
 func (h *Handlers) handleGetTaskByID(w http.ResponseWriter, r *http.Request) {
