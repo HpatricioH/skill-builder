@@ -10,12 +10,14 @@ import (
 
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
+	"taskforge/internal/worker"
 )
 
 type Handlers struct {
-	mu    sync.Mutex
-	svc   *task.Service
-	store *storage.FileStorage
+	mu        sync.Mutex
+	svc       *task.Service
+	store     *storage.FileStorage
+	processor *worker.Processor
 }
 
 type errorResponse struct {
@@ -93,6 +95,10 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 	if err := h.store.Save(h.svc.ListTasks()); err != nil {
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to save tasks"})
 		return
+	}
+
+	if h.processor != nil {
+		h.processor.Enqueue(fmt.Sprintf("task %d completed", id))
 	}
 
 	writeJSON(w, http.StatusOK, messageResponse{

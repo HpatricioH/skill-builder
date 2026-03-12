@@ -5,10 +5,15 @@ import (
 
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
+	"taskforge/internal/worker"
 )
 
-func NewServer(svc *task.Service, store *storage.FileStorage) *http.ServeMux {
-	h := &Handlers{svc: svc, store: store}
+func NewServer(svc *task.Service, store *storage.FileStorage, processor *worker.Processor) *http.ServeMux {
+	h := &Handlers{
+		svc:       svc,
+		store:     store,
+		processor: processor,
+	}
 
 	mux := http.NewServeMux()
 

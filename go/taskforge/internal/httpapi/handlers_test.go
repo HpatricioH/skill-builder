@@ -13,7 +13,7 @@ func TestGETTasks_Empty(t *testing.T) {
 	// Arrange
 	svc := task.NewService(nil)
 	store := storage.NewFileStorage("test_tasks.json") // not used by GET
-	mux := NewServer(svc, store)
+	mux := NewServer(svc, store, nil)
 
 	// Act
 	req := httptest.NewRequest(http.MethodGet, "/tasks", nil)

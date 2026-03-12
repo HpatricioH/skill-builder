@@ -14,6 +14,7 @@ import (
 	"taskforge/internal/httpapi"
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
+	"taskforge/internal/worker"
 )
 
 func main() {
@@ -25,9 +26,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	processor := worker.NewProcessor(10)
+	processor.Start()
+	defer processor.Stop()
+
 	svc := task.NewService(existing)
 
-	mux := httpapi.NewServer(svc, store)
+	mux := httpapi.NewServer(svc, store, processor)
 	handler := httpapi.WithMiddleware(mux)
 
 	server := &http.Server{
