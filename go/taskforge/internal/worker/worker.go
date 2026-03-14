@@ -12,10 +12,10 @@ const (
 )
 
 type Job struct {
-	Type     JobType
-	TaskID   int
-	Message  string
-	CreateAt time.Time
+	Type      JobType
+	TaskID    int
+	Message   string
+	CreatedAt time.Time
 }
 
 type Processor struct {
@@ -37,7 +37,7 @@ func (p *Processor) Start() {
 				"processing job type=%s task_id=%d created_at=%s message=%q",
 				job.Type,
 				job.TaskID,
-				job.CreateAt.Format(time.RFC3339),
+				job.CreatedAt.Format(time.RFC3339),
 				job.Message,
 			)
 

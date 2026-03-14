@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
@@ -98,7 +99,12 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.processor != nil {
-		h.processor.Enqueue(fmt.Sprintf("task %d completed", id))
+		h.processor.Enqueue(worker.Job{
+			Type:      worker.JobTaskCompleted,
+			TaskID:    id,
+			Message:   fmt.Sprintf("task %d complted", id),
+			CreatedAt: time.Now(),
+		})
 	}
 
 	writeJSON(w, http.StatusOK, messageResponse{
