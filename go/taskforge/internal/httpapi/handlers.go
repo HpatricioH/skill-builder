@@ -102,7 +102,7 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 		h.processor.Enqueue(worker.Job{
 			Type:      worker.JobTaskCompleted,
 			TaskID:    id,
-			Message:   fmt.Sprintf("task %d complted", id),
+			Message:   fmt.Sprintf("task %d completed", id),
 			CreatedAt: time.Now(),
 		})
 	}

@@ -26,7 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	processor := worker.NewProcessor(10)
+	processor := worker.NewProcessor(10, 3)
 	processor.Start()
 	defer processor.Stop()
 
