@@ -26,11 +26,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	processor := worker.NewProcessor(10, 3)
-	processor.Start()
-	defer processor.Stop()
-
 	svc := task.NewService(existing)
+
+	workerCtx, workerCancel := context.WithCancel(context.Background())
+	defer workerCancel()
+
+	processor := worker.NewProcessor(10, 3)
+	processor.Start(workerCtx)
+	defer processor.Stop()
 
 	mux := httpapi.NewServer(svc, store, processor)
 	handler := httpapi.WithMiddleware(mux)
@@ -54,6 +57,10 @@ func main() {
 
 	<-stop
 	fmt.Println("\nShutdown signal received...")
+
+	// Stop workers first
+	workerCancel()
+	processor.Stop()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"log"
 	"sync"
 	"time"
@@ -34,7 +35,7 @@ func NewProcessor(buffer int, workers int) *Processor {
 	}
 }
 
-func (p *Processor) Start() {
+func (p *Processor) Start(ctx context.Context) {
 	for i := 1; i <= p.workers; i++ {
 		workerID := i
 
@@ -43,28 +44,38 @@ func (p *Processor) Start() {
 		go func() {
 			defer p.wg.Done()
 
-			for job := range p.jobs {
-				log.Printf(
-					"worker=%d processing job type=%s task_id=%d created_at=%s message=%q",
-					workerID,
-					job.Type,
-					job.TaskID,
-					job.CreatedAt.Format(time.RFC3339),
-					job.Message,
-				)
+			for {
+				select {
+				case <-ctx.Done():
+					log.Printf("worker=%d cancelled", workerID)
+					return
 
-				// Simulate work
-				time.Sleep(500 * time.Millisecond)
+				case job, ok := <-p.jobs:
+					if !ok {
+						log.Printf("worker=%d stopped", workerID)
+						return
+					}
 
-				log.Printf(
-					"worker=%d finished job type=%s task_id=%d",
-					workerID,
-					job.Type,
-					job.TaskID,
-				)
+					log.Printf(
+						"worker=%d processing job type=%s task_id=%d created_at=%s message=%q",
+						workerID,
+						job.Type,
+						job.TaskID,
+						job.CreatedAt.Format(time.RFC3339),
+						job.Message,
+					)
+
+					// Simulate work
+					time.Sleep(500 * time.Millisecond)
+
+					log.Printf(
+						"worker=%d finished job type=%s task_id=%d",
+						workerID,
+						job.Type,
+						job.TaskID,
+					)
+				}
 			}
-
-			log.Printf("worker=%d stopeed", workerID)
 		}()
 	}
 }
