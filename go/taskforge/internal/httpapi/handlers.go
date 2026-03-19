@@ -99,12 +99,15 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.processor != nil {
-		h.processor.Enqueue(worker.Job{
+		err := h.processor.Enqueue(r.Context(), worker.Job{
 			Type:      worker.JobTaskCompleted,
 			TaskID:    id,
 			Message:   fmt.Sprintf("task %d completed", id),
 			CreatedAt: time.Now(),
 		})
+		if err != nil {
+			fmt.Printf("warning: failed to enqueue background job for task %d: %v\n", id, err)
+		}
 	}
 
 	writeJSON(w, http.StatusOK, messageResponse{

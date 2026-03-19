@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"errors"
 	"log"
 	"sync"
 	"time"
@@ -11,6 +12,11 @@ type JobType string
 
 const (
 	JobTaskCompleted JobType = "task_completed"
+)
+
+var (
+	ErrProcessorStopped = errors.New("processor stopped")
+	ErrQueueFull        = errors.New("job queue is full")
 )
 
 type Job struct {
@@ -25,6 +31,9 @@ type Processor struct {
 	jobs    chan Job
 	workers int
 	wg      sync.WaitGroup
+
+	mu      sync.RWMutex
+	stopped bool
 }
 
 func NewProcessor(buffer int, workers int) *Processor {
@@ -66,7 +75,7 @@ func (p *Processor) Start(ctx context.Context) {
 					)
 
 					// Simulate work
-					time.Sleep(500 * time.Millisecond)
+					time.Sleep(3 * time.Second)
 
 					log.Printf(
 						"worker=%d finished job type=%s task_id=%d",
@@ -80,13 +89,35 @@ func (p *Processor) Start(ctx context.Context) {
 	}
 }
 
-// this sends a job into the channel
-func (p *Processor) Enqueue(job Job) {
-	p.jobs <- job
+func (p *Processor) Enqueue(ctx context.Context, job Job) error {
+	p.mu.RLock()
+	stopped := p.stopped
+	p.mu.RUnlock()
+
+	if stopped {
+		return ErrProcessorStopped
+	}
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case p.jobs <- job:
+		return nil
+	default:
+		return ErrQueueFull
+	}
 }
 
 // this closes the channel
 func (p *Processor) Stop() {
+	p.mu.Lock()
+	if p.stopped {
+		p.mu.Unlock()
+		return
+	}
+	p.stopped = true
 	close(p.jobs)
+	p.mu.Unlock()
+
 	p.wg.Wait()
 }
