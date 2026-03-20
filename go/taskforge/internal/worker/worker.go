@@ -75,7 +75,7 @@ func (p *Processor) Start(ctx context.Context) {
 					)
 
 					// Simulate work
-					time.Sleep(3 * time.Second)
+					time.Sleep(500 * time.Millisecond)
 
 					log.Printf(
 						"worker=%d finished job type=%s task_id=%d",

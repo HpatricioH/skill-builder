@@ -31,7 +31,7 @@ func main() {
 	workerCtx, workerCancel := context.WithCancel(context.Background())
 	defer workerCancel()
 
-	processor := worker.NewProcessor(1, 1)
+	processor := worker.NewProcessor(10, 3)
 	processor.Start(workerCtx)
 	defer processor.Stop()
 
