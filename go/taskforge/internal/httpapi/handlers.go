@@ -178,3 +178,19 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
 }
+
+func (h *Handlers) enqueueTaskCompleted(r *http.Request, taskID int) {
+	if h.processor == nil {
+		return
+	}
+
+	err := h.processor.Enqueue(r.Context(), worker.Job{
+		Type:      worker.JobTaskCompleted,
+		TaskID:    taskID,
+		Message:   fmt.Sprintf("task %d completed", taskID),
+		CreatedAt: time.Now(),
+	})
+	if err != nil {
+		fmt.Printf("warning: failed to enqueue background job for task %d: %v\n", taskID, err)
+	}
+}
