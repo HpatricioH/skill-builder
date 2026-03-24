@@ -5,14 +5,17 @@ import (
 
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
+	"taskforge/internal/taskapp"
 	"taskforge/internal/worker"
 )
 
 func NewServer(svc *task.Service, store *storage.FileStorage, processor *worker.Processor) *http.ServeMux {
+	app := taskapp.New(svc, store, processor)
+
 	h := &Handlers{
-		svc:       svc,
-		store:     store,
-		processor: processor,
+		svc:   svc,
+		app:   app,
+		store: store,
 	}
 
 	mux := http.NewServeMux()

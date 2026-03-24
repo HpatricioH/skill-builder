@@ -10,6 +10,7 @@ import (
 
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
+	"taskforge/internal/taskapp"
 )
 
 func newHandlers(t *testing.T) (*Handlers, string) {
@@ -26,8 +27,13 @@ func newHandlers(t *testing.T) (*Handlers, string) {
 	}
 
 	svc := task.NewService(existing)
+	app := taskapp.New(svc, store, nil)
 
-	return &Handlers{svc: svc, store: store}, path
+	return &Handlers{
+		svc:   svc,
+		app:   app,
+		store: store,
+	}, path
 }
 
 func TestHandlers_Flow_Create_List_Done_Delete(t *testing.T) {

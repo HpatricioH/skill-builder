@@ -7,18 +7,17 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
-	"taskforge/internal/worker"
+	"taskforge/internal/taskapp"
 )
 
 type Handlers struct {
-	mu        sync.Mutex
-	svc       *task.Service
-	store     *storage.FileStorage
-	processor *worker.Processor
+	mu    sync.Mutex
+	svc   *task.Service
+	app   *taskapp.App
+	store *storage.FileStorage
 }
 
 type errorResponse struct {
@@ -83,7 +82,7 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.svc.MarkDone(id); err != nil {
+	if err := h.app.MarkDone(r.Context(), id); err != nil {
 		// simple mapping for now
 		code := http.StatusNotFound
 		if strings.Contains(err.Error(), "already completed") {
@@ -91,23 +90,6 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 		}
 		writeJSON(w, code, errorResponse{Error: err.Error()})
 		return
-	}
-
-	if err := h.store.Save(h.svc.ListTasks()); err != nil {
-		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to save tasks"})
-		return
-	}
-
-	if h.processor != nil {
-		err := h.processor.Enqueue(r.Context(), worker.Job{
-			Type:      worker.JobTaskCompleted,
-			TaskID:    id,
-			Message:   fmt.Sprintf("task %d completed", id),
-			CreatedAt: time.Now(),
-		})
-		if err != nil {
-			fmt.Printf("warning: failed to enqueue background job for task %d: %v\n", id, err)
-		}
 	}
 
 	writeJSON(w, http.StatusOK, messageResponse{
@@ -177,20 +159,4 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
-}
-
-func (h *Handlers) enqueueTaskCompleted(r *http.Request, taskID int) {
-	if h.processor == nil {
-		return
-	}
-
-	err := h.processor.Enqueue(r.Context(), worker.Job{
-		Type:      worker.JobTaskCompleted,
-		TaskID:    taskID,
-		Message:   fmt.Sprintf("task %d completed", taskID),
-		CreatedAt: time.Now(),
-	})
-	if err != nil {
-		fmt.Printf("warning: failed to enqueue background job for task %d: %v\n", taskID, err)
-	}
 }
