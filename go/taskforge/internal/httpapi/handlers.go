@@ -53,19 +53,9 @@ func (h *Handlers) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		Title string `json:"title"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid json"})
-		return
-	}
-
-	t, err := h.svc.AddTask(body.Title)
+	t, err := h.app.CreateTask(r.Context(), body.Title)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: err.Error()})
-		return
-	}
-
-	if err := h.store.Save(h.svc.ListTasks()); err != nil {
-		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to save tasks"})
 		return
 	}
 
@@ -110,17 +100,17 @@ func (h *Handlers) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
 
 	id, ok := parseIDFromPath(parts[1])
 	if !ok {
+		if err := h.store.Save(h.svc.ListTasks()); err != nil {
+			writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to save tasks"})
+			return
+		}
+
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid id"})
 		return
 	}
 
-	if err := h.svc.DeleteTask(id); err != nil {
+	if err := h.app.DeleteTask(r.Context(), id); err != nil {
 		writeJSON(w, http.StatusNotFound, errorResponse{Error: err.Error()})
-		return
-	}
-
-	if err := h.store.Save(h.svc.ListTasks()); err != nil {
-		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to save tasks"})
 		return
 	}
 

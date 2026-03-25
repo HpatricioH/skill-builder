@@ -24,6 +24,19 @@ func New(service *task.Service, store *storage.FileStorage, processor *worker.Pr
 	}
 }
 
+func (a *App) CreateTask(ctx context.Context, title string) (task.Task, error) {
+	t, err := a.service.AddTask(title)
+	if err != nil {
+		return task.Task{}, err
+	}
+
+	if err := a.store.Save(a.service.ListTasks()); err != nil {
+		return task.Task{}, err
+	}
+
+	return t, nil
+}
+
 func (a *App) MarkDone(ctx context.Context, id int) error {
 	if err := a.service.MarkDone(id); err != nil {
 		return err
@@ -40,6 +53,18 @@ func (a *App) MarkDone(ctx context.Context, id int) error {
 			Message:   fmt.Sprintf("task %d completed", id),
 			CreatedAt: time.Now(),
 		})
+	}
+
+	return nil
+}
+
+func (a *App) DeleteTask(ctx context.Context, id int) error {
+	if err := a.service.DeleteTask(id); err != nil {
+		return err
+	}
+
+	if err := a.store.Save(a.service.ListTasks()); err != nil {
+		return err
 	}
 
 	return nil
