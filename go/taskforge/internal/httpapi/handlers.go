@@ -53,6 +53,11 @@ func (h *Handlers) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		Title string `json:"title"`
 	}
 
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid json"})
+		return
+	}
+
 	t, err := h.app.CreateTask(r.Context(), body.Title)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: err.Error()})
