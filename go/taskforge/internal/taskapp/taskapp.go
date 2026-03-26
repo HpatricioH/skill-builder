@@ -37,25 +37,25 @@ func (a *App) CreateTask(ctx context.Context, title string) (task.Task, error) {
 	return t, nil
 }
 
-func (a *App) MarkDone(ctx context.Context, id int) error {
+func (a *App) MarkDone(ctx context.Context, id int) ([]Event, error) {
 	if err := a.service.MarkDone(id); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := a.store.Save(a.service.ListTasks()); err != nil {
-		return err
+		return nil, err
 	}
 
-	if a.processor != nil {
-		_ = a.processor.Enqueue(ctx, worker.Job{
-			Type:      worker.JobTaskCompleted,
-			TaskID:    id,
-			Message:   fmt.Sprintf("task %d completed", id),
-			CreatedAt: time.Now(),
-		})
+	events := []Event{
+		{
+			Type:   EventTaskCompleted,
+			TaskID: id,
+		},
 	}
 
-	return nil
+	a.dispatchEvents(ctx, events)
+
+	return events, nil
 }
 
 func (a *App) DeleteTask(ctx context.Context, id int) error {
@@ -68,4 +68,29 @@ func (a *App) DeleteTask(ctx context.Context, id int) error {
 	}
 
 	return nil
+}
+
+func (a *App) dispatchEvents(ctx context.Context, events []Event) {
+	for _, event := range events {
+		switch event.Type {
+		case EventTaskCompleted:
+			a.enqueueTaskCompleted(ctx, event.TaskID)
+		}
+	}
+}
+
+func (a *App) enqueueTaskCompleted(ctx context.Context, taskID int) {
+	if a.processor == nil {
+		return
+	}
+
+	err := a.processor.Enqueue(ctx, worker.Job{
+		Type:      worker.JobTaskCompleted,
+		TaskID:    taskID,
+		Message:   fmt.Sprintf("task %d completed", taskID),
+		CreatedAt: time.Now(),
+	})
+	if err != nil {
+		fmt.Printf("warning: failed to enqueue background job for task %d: %v\n", taskID, err)
+	}
 }

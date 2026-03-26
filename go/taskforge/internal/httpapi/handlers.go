@@ -77,7 +77,7 @@ func (h *Handlers) handleMarkDone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.app.MarkDone(r.Context(), id); err != nil {
+	if _, err := h.app.MarkDone(r.Context(), id); err != nil {
 		// simple mapping for now
 		code := http.StatusNotFound
 		if strings.Contains(err.Error(), "already completed") {
