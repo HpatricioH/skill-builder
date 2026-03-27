@@ -2,25 +2,22 @@ package taskapp
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
-	"taskforge/internal/worker"
 )
 
 type App struct {
-	service   *task.Service
-	store     *storage.FileStorage
-	processor *worker.Processor
+	service    *task.Service
+	store      *storage.FileStorage
+	dispatcher Dispatcher
 }
 
-func New(service *task.Service, store *storage.FileStorage, processor *worker.Processor) *App {
+func New(service *task.Service, store *storage.FileStorage, dispatcher Dispatcher) *App {
 	return &App{
-		service:   service,
-		store:     store,
-		processor: processor,
+		service:    service,
+		store:      store,
+		dispatcher: dispatcher,
 	}
 }
 
@@ -53,7 +50,9 @@ func (a *App) MarkDone(ctx context.Context, id int) ([]Event, error) {
 		},
 	}
 
-	a.dispatchEvents(ctx, events)
+	if a.dispatcher != nil {
+		a.dispatcher.Dispatch(ctx, events)
+	}
 
 	return events, nil
 }
@@ -68,29 +67,4 @@ func (a *App) DeleteTask(ctx context.Context, id int) error {
 	}
 
 	return nil
-}
-
-func (a *App) dispatchEvents(ctx context.Context, events []Event) {
-	for _, event := range events {
-		switch event.Type {
-		case EventTaskCompleted:
-			a.enqueueTaskCompleted(ctx, event.TaskID)
-		}
-	}
-}
-
-func (a *App) enqueueTaskCompleted(ctx context.Context, taskID int) {
-	if a.processor == nil {
-		return
-	}
-
-	err := a.processor.Enqueue(ctx, worker.Job{
-		Type:      worker.JobTaskCompleted,
-		TaskID:    taskID,
-		Message:   fmt.Sprintf("task %d completed", taskID),
-		CreatedAt: time.Now(),
-	})
-	if err != nil {
-		fmt.Printf("warning: failed to enqueue background job for task %d: %v\n", taskID, err)
-	}
 }

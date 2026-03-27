@@ -10,7 +10,8 @@ import (
 )
 
 func NewServer(svc *task.Service, store *storage.FileStorage, processor *worker.Processor) *http.ServeMux {
-	app := taskapp.New(svc, store, processor)
+	dispatcher := taskapp.NewWorkerDispatcher(processor)
+	app := taskapp.New(svc, store, dispatcher)
 
 	h := &Handlers{
 		svc:   svc,
