@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"taskforge/internal/db"
 	"taskforge/internal/httpapi"
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
@@ -27,6 +28,18 @@ func main() {
 	}
 
 	svc := task.NewService(existing)
+
+	database, err := db.Open("taskforge.db")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error opening database:", err)
+		os.Exit(1)
+	}
+	defer database.Close()
+
+	if err := db.InitSchema(database); err != nil {
+		fmt.Fprintln(os.Stderr, "Error initializing schema:", err)
+		os.Exit(1)
+	}
 
 	workerCtx, workerCancel := context.WithCancel(context.Background())
 	defer workerCancel()
