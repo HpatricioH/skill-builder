@@ -74,6 +74,15 @@ func (r *Repository) List(ctx context.Context) ([]task.Task, error) {
 }
 
 func (r *Repository) MarkDone(ctx context.Context, id int) error {
+	t, err := r.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if t.Completed {
+		return fmt.Errorf("task already completed")
+	}
+
 	res, err := r.db.ExecContext(
 		ctx,
 		`UPDATE tasks SET completed = 1 WHERE id = ?`,
