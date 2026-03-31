@@ -116,3 +116,26 @@ func (r *Repository) Delete(ctx context.Context, id int) error {
 
 	return nil
 }
+
+func (r *Repository) GetByID(ctx context.Context, id int) (task.Task, error) {
+	row := r.db.QueryRowContext(ctx, `
+		SELECT id, title, completed, created_at
+		FROM trasks
+		WHERE id = ?
+		`, id)
+
+	var t task.Task
+	if err := row.Scan(
+		&t.ID,
+		&t.Title,
+		&t.Completed,
+		&t.CreatedAt,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return task.Task{}, fmt.Errorf("task not found")
+		}
+		return task.Task{}, fmt.Errorf("get task by id: %w", err)
+	}
+
+	return t, nil
+}
