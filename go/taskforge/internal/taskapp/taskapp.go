@@ -3,43 +3,28 @@ package taskapp
 import (
 	"context"
 
-	"taskforge/internal/storage"
 	"taskforge/internal/task"
+	"taskforge/internal/taskrepo"
 )
 
 type App struct {
-	service    *task.Service
-	store      *storage.FileStorage
+	repo       *taskrepo.Repository
 	dispatcher Dispatcher
 }
 
-func New(service *task.Service, store *storage.FileStorage, dispatcher Dispatcher) *App {
+func New(repo *taskrepo.Repository, dispatcher Dispatcher) *App {
 	return &App{
-		service:    service,
-		store:      store,
+		repo:       repo,
 		dispatcher: dispatcher,
 	}
 }
 
 func (a *App) CreateTask(ctx context.Context, title string) (task.Task, error) {
-	t, err := a.service.AddTask(title)
-	if err != nil {
-		return task.Task{}, err
-	}
-
-	if err := a.store.Save(a.service.ListTasks()); err != nil {
-		return task.Task{}, err
-	}
-
-	return t, nil
+	return a.repo.Create(ctx, title)
 }
 
 func (a *App) MarkDone(ctx context.Context, id int) ([]Event, error) {
-	if err := a.service.MarkDone(id); err != nil {
-		return nil, err
-	}
-
-	if err := a.store.Save(a.service.ListTasks()); err != nil {
+	if err := a.repo.MarkDone(ctx, id); err != nil {
 		return nil, err
 	}
 
@@ -58,13 +43,5 @@ func (a *App) MarkDone(ctx context.Context, id int) ([]Event, error) {
 }
 
 func (a *App) DeleteTask(ctx context.Context, id int) error {
-	if err := a.service.DeleteTask(id); err != nil {
-		return err
-	}
-
-	if err := a.store.Save(a.service.ListTasks()); err != nil {
-		return err
-	}
-
-	return nil
+	return a.repo.Delete(ctx, id)
 }
