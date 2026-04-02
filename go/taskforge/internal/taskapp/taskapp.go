@@ -45,3 +45,11 @@ func (a *App) MarkDone(ctx context.Context, id int) ([]Event, error) {
 func (a *App) DeleteTask(ctx context.Context, id int) error {
 	return a.repo.Delete(ctx, id)
 }
+
+func (a *App) ListTasks(ctx context.Context) ([]task.Task, error) {
+	return a.repo.List(ctx)
+}
+
+func (a *App) GetTaskByID(ctx context.Context, id int) (task.Task, error) {
+	return a.repo.GetByID(ctx, id)
+}

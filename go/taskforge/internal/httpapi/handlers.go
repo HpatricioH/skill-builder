@@ -42,7 +42,13 @@ func (h *Handlers) handleListTasks(w http.ResponseWriter, r *http.Request) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	writeJSON(w, http.StatusOK, h.svc.ListTasks())
+	tasks, err := h.app.ListTasks(r.Context())
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to list tasks"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, tasks)
 }
 
 func (h *Handlers) handleCreateTask(w http.ResponseWriter, r *http.Request) {
@@ -134,11 +140,12 @@ func (h *Handlers) handleGetTaskByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := h.svc.GetTaskByID(id)
+	t, err := h.app.GetTaskByID(r.Context(), id)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: err.Error()})
 		return
 	}
+
 	writeJSON(w, http.StatusOK, t)
 }
 

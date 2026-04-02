@@ -6,12 +6,13 @@ import (
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
 	"taskforge/internal/taskapp"
+	"taskforge/internal/taskrepo"
 	"taskforge/internal/worker"
 )
 
-func NewServer(svc *task.Service, store *storage.FileStorage, processor *worker.Processor) *http.ServeMux {
+func NewServer(svc *task.Service, store *storage.FileStorage, processor *worker.Processor, repo *taskrepo.Repository) *http.ServeMux {
 	dispatcher := taskapp.NewWorkerDispatcher(processor)
-	app := taskapp.New(svc, store, dispatcher)
+	app := taskapp.New(repo, dispatcher)
 
 	h := &Handlers{
 		svc:   svc,
