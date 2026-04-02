@@ -15,6 +15,7 @@ import (
 	"taskforge/internal/httpapi"
 	"taskforge/internal/storage"
 	"taskforge/internal/task"
+	"taskforge/internal/taskrepo"
 	"taskforge/internal/worker"
 )
 
@@ -41,6 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	repo := taskrepo.New(database)
 	workerCtx, workerCancel := context.WithCancel(context.Background())
 	defer workerCancel()
 
@@ -48,7 +50,7 @@ func main() {
 	processor.Start(workerCtx)
 	defer processor.Stop()
 
-	mux := httpapi.NewServer(svc, store, processor)
+	mux := httpapi.NewServer(svc, store, processor, repo)
 	handler := httpapi.WithMiddleware(mux)
 
 	server := &http.Server{
