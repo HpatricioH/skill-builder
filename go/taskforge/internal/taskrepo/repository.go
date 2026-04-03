@@ -129,7 +129,7 @@ func (r *Repository) Delete(ctx context.Context, id int) error {
 func (r *Repository) GetByID(ctx context.Context, id int) (task.Task, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, title, completed, created_at
-		FROM trasks
+		FROM tasks
 		WHERE id = ?
 		`, id)
 

@@ -38,14 +38,14 @@ func newHandlers(t *testing.T) (*Handlers, string) {
 
 	return &Handlers{
 		app: app,
-	}, dbpath
+	}, dbPath
 }
 
 func newTestRepo(t *testing.T) *taskrepo.Repository {
 	t.Helper()
 
 	dir := t.TempDir()
-	dbPath := filePath.Join(dir, "test.db")
+	dbPath := filepath.Join(dir, "test.db")
 
 	database, err := db.Open(dbPath)
 	if err != nil {

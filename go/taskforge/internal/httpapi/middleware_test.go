@@ -12,7 +12,9 @@ import (
 func TestRequestIDMiddleware_AddsHeader(t *testing.T) {
 	svc := task.NewService(nil)
 	store := storage.NewFileStorage("test_tasks.json")
-	mux := NewServer(svc, store, nil)
+	repo := newTestRepo(t)
+
+	mux := NewServer(svc, store, nil, repo)
 	handler := WithMiddleware(mux)
 
 	req := httptest.NewRequest(http.MethodGet, "/tasks", nil)
