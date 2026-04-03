@@ -13,6 +13,8 @@ func TestGETTasks_Empty(t *testing.T) {
 	// Arrange
 	svc := task.NewService(nil)
 	store := storage.NewFileStorage("test_tasks.json") // not used by GET
+	repo, err := newHandlers(t)
+
 	mux := NewServer(svc, store, nil)
 
 	// Act

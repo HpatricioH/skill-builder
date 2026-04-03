@@ -8,32 +8,59 @@ import (
 	"path/filepath"
 	"testing"
 
-	"taskforge/internal/storage"
+	"taskforge/internal/db"
 	"taskforge/internal/task"
 	"taskforge/internal/taskapp"
+	"taskforge/internal/taskrepo"
 )
 
 func newHandlers(t *testing.T) (*Handlers, string) {
 	t.Helper()
 
 	dir := t.TempDir()
-	path := filepath.Join(dir, "tasks.json")
+	dbPath := filepath.Join(dir, "test.db")
 
-	store := storage.NewFileStorage(path)
-
-	existing, err := store.Load()
+	database, err := db.Open(dbPath)
 	if err != nil {
-		t.Fatalf("Load() error = %v", err)
+		t.Fatalf("open db: %v", err)
 	}
 
-	svc := task.NewService(existing)
-	app := taskapp.New(svc, store, nil)
+	t.Cleanup(func() {
+		_ = database.Close()
+	})
+
+	if err := db.InitSchema(database); err != nil {
+		t.Fatalf("init schema: %v", err)
+	}
+
+	repo := taskrepo.New(database)
+	app := taskapp.New(repo, nil)
 
 	return &Handlers{
-		svc:   svc,
-		app:   app,
-		store: store,
-	}, path
+		app: app,
+	}, dbpath
+}
+
+func newTestRepo(t *testing.T) *taskrepo.Repository {
+	t.Helper()
+
+	dir := t.TempDir()
+	dbPath := filePath.Join(dir, "test.db")
+
+	database, err := db.Open(dbPath)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+
+	t.Cleanup(func() {
+		_ = database.Close()
+	})
+
+	if err := db.InitSchema(database); err != nil {
+		t.Fatalf("init schema: %v", err)
+	}
+
+	return taskrepo.New(database)
 }
 
 func TestHandlers_Flow_Create_List_Done_Delete(t *testing.T) {
