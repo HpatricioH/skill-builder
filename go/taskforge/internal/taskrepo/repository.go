@@ -148,3 +148,31 @@ func (r *Repository) GetByID(ctx context.Context, id int) (task.Task, error) {
 
 	return t, nil
 }
+
+func (r *Repository) UpdateTitle(ctx context.Context, id int, title string) (task.Task, error) {
+	res, err := r.db.ExecContext(
+		ctx,
+		`UPDATE tasks SET title = ? WHERE id = ?`,
+		title,
+		id,
+	)
+	if err != nil {
+		return task.Task{}, fmt.Errorf("update task title: %w", err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return task.Task{}, fmt.Errorf("rows affected: %w", err)
+	}
+
+	if affected == 0 {
+		return task.Task{}, fmt.Errorf("task no found")
+	}
+
+	updated, err := r.GetByID(ctx, id)
+	if err != nil {
+		return task.Task{}, err
+	}
+
+	return updated, nil
+}

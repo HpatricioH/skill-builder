@@ -53,3 +53,7 @@ func (a *App) ListTasks(ctx context.Context) ([]task.Task, error) {
 func (a *App) GetTaskByID(ctx context.Context, id int) (task.Task, error) {
 	return a.repo.GetByID(ctx, id)
 }
+
+func (a *App) UpdateTaskTitle(ctx context.Context, id int, title string) (task.Task, error) {
+	return a.repo.UpdateTitle(ctx, id, title)
+}

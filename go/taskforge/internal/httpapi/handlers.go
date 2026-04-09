@@ -149,6 +149,46 @@ func (h *Handlers) handleGetTaskByID(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, t)
 }
 
+func (h *Handlers) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+
+	if len(parts) != 2 || parts[0] != "tasks" {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid path"})
+		return
+	}
+
+	id, ok := parseIDFromPath(parts[1])
+	if !ok {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid id"})
+	}
+
+	var body struct {
+		Title string `json:"title"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid json"})
+		return
+	}
+
+	body.Title = strings.TrimSpace(body.Title)
+	if body.Title == "" {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "title cannot be empty"})
+		return
+	}
+
+	updated, err := h.app.UpdateTaskTitle(r.Context(), id, body.Title)
+	if err != nil {
+		writeJSON(w, http.StatusNotFound, errorResponse{Error: err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, updated)
+}
+
 func parseIDFromPath(raw string) (int, bool) {
 	id, err := strconv.Atoi(raw)
 	if err != nil || id <= 0 {

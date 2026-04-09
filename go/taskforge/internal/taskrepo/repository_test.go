@@ -180,3 +180,32 @@ func TestRepository_Delete_NotFound(t *testing.T) {
 		t.Fatal("Delete() error = nil, want error")
 	}
 }
+
+// Update title test
+func TestRepository_UpdateTitle(t *testing.T) {
+	repo := newTestRepo(t)
+	ctx := context.Background()
+
+	created, err := repo.Create(ctx, "Old title")
+	if err != nil {
+		t.Fatalf("Create() error = %v", err)
+	}
+
+	updated, err := repo.UpdateTitle(ctx, created.ID, "New Title")
+	if err != nil {
+		t.Fatalf("UpdateTitle() error = %v", err)
+	}
+
+	if updated.Title != "New title" {
+		t.Fatalf("updated.Title = %q, want %q", updated.Title, "New Title")
+	}
+
+	got, err := repo.GetByID(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("GetByID() err = %v", err)
+	}
+
+	if got.Title != "New title" {
+		t.Fatalf("stored title = %q, want %q", got.Title, "New title")
+	}
+}

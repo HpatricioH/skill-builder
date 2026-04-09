@@ -30,6 +30,7 @@ func NewServer(svc *task.Service, store *storage.FileStorage, processor *worker.
 	mux.HandleFunc("POST /tasks", h.handleCreateTask)
 
 	// Item routes
+	mux.HandleFunc("PATCH /tasks/{id}", h.handleUpdateTask)
 	mux.HandleFunc("PATCH /tasks/{id}/done", h.handleMarkDone)
 	mux.HandleFunc("DELETE /tasks/{id}", h.handleDeleteTask)
 
