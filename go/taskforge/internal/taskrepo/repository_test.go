@@ -196,7 +196,7 @@ func TestRepository_UpdateTitle(t *testing.T) {
 		t.Fatalf("UpdateTitle() error = %v", err)
 	}
 
-	if updated.Title != "New title" {
+	if updated.Title != "New Title" {
 		t.Fatalf("updated.Title = %q, want %q", updated.Title, "New Title")
 	}
 
@@ -205,7 +205,7 @@ func TestRepository_UpdateTitle(t *testing.T) {
 		t.Fatalf("GetByID() err = %v", err)
 	}
 
-	if got.Title != "New title" {
-		t.Fatalf("stored title = %q, want %q", got.Title, "New title")
+	if got.Title != "New Title" {
+		t.Fatalf("stored title = %q, want %q", got.Title, "New Title")
 	}
 }

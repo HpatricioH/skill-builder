@@ -161,3 +161,45 @@ func TestHandlers_Flow_Create_List_Done_Delete(t *testing.T) {
 		}
 	}
 }
+
+// Update Task Title Test handler
+func TestHandlers_UpdateTaskTitle(t *testing.T) {
+	h, _ := newHandlers(t)
+
+	// Create initial task
+	{
+		body := []byte(`{"title":"Old title"}`)
+		req := httptest.NewRequest(http.MethodPost, "/tasks", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+
+		h.handleCreateTask(rec, req)
+
+		if rec.Code != http.StatusCreated {
+			t.Fatalf("POST status=%d want=%d body=%s", rec.Code, http.StatusCreated, rec.Body.String())
+		}
+	}
+
+	// Update title
+	{
+		body := []byte(`{"title":"New Title"}`)
+		req := httptest.NewRequest(http.MethodPatch, "/tasks/1", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+
+		h.handleUpdateTask(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("PATCH status=%d want=%d body=%s", rec.Code, http.StatusOK, rec.Body.String())
+		}
+
+		var updated task.Task
+		if err := json.NewDecoder(rec.Body).Decode(&updated); err != nil {
+			t.Fatalf("decode updated task error=%v", err)
+		}
+
+		if updated.Title != "New Title" {
+			t.Fatalf("updated.Title=%q want=%q", updated.Title, "New title")
+		}
+	}
+}
