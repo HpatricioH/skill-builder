@@ -1,0 +1,8 @@
+.git
+.gitignore
+taskforge.db
+tasks.json
+bin/
+dist/
+*.exe 
+*.test 
