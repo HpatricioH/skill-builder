@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: taskforge-api
+    ports:
+      - "8080:8080"
+    environment:
+      - TASKFORGE_DB_PATH=/app/data/taskforge.TASKFORGE_DB_PATH
+    volumes:
+      - ./data:/app/data
