@@ -19,6 +19,14 @@ import (
 	"taskforge/internal/worker"
 )
 
+func getEnv(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+	return value
+}
+
 func main() {
 	store := storage.NewFileStorage(filepath.Join(".", "tasks.json"))
 
@@ -30,7 +38,9 @@ func main() {
 
 	svc := task.NewService(existing)
 
-	database, err := db.Open("taskforge.db")
+	dbPath := getEnv("TASKFORGE_DB_PATH", "taskforge.db")
+
+	database, err := db.Open(dbPath)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error opening database:", err)
 		os.Exit(1)
