@@ -180,7 +180,7 @@ func TestHandlers_UpdateTaskTitle(t *testing.T) {
 		}
 	}
 
-	// Update title
+	// Update the title of created initial task if server reponse is ok
 	{
 		body := []byte(`{"title":"New Title"}`)
 		req := httptest.NewRequest(http.MethodPatch, "/tasks/1", bytes.NewReader(body))
