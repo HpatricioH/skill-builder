@@ -176,3 +176,37 @@ func (r *Repository) UpdateTitle(ctx context.Context, id int, title string) (tas
 
 	return updated, nil
 }
+
+func (r *Repository) ListPaginated(ctx context.Context, limit, offset int) ([]task.Task, error) {
+	rows, err := r.db.QueryContext(ctx, `
+    SELECT id, title, completed, created_at
+		FROM task
+		ORDER BY id ASC 
+		LIMIT ? OFFSET ?
+		`, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("list paginated tasks: %w", err)
+	}
+	defer rows.Close()
+
+	var tasks []task.Task
+
+	for rows.Next() {
+		var t task.Task
+		if err := rows.Scan(
+			&t.ID,
+			&t.Title,
+			&t.Completed,
+			&t.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan task: %w", err)
+		}
+		tasks = append(tasks, t)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate tasks: %w", err)
+	}
+
+	return tasks, nil
+}

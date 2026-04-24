@@ -57,3 +57,7 @@ func (a *App) GetTaskByID(ctx context.Context, id int) (task.Task, error) {
 func (a *App) UpdateTaskTitle(ctx context.Context, id int, title string) (task.Task, error) {
 	return a.repo.UpdateTitle(ctx, id, title)
 }
+
+func (a *App) ListTasksPaginated(ctx context.Context, limit, offset int) ([]task.Task, error) {
+	return a.repo.ListPaginated(ctx, limit, offset)
+}
