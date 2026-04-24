@@ -42,7 +42,33 @@ func (h *Handlers) handleListTasks(w http.ResponseWriter, r *http.Request) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	tasks, err := h.app.ListTasks(r.Context())
+	limit := 20
+	offset := 0
+
+	if rawLimit := r.URL.Query().Get("limit"); rawLimit != "" {
+		parsed, err := strconv.Atoi(rawLimit)
+		if err != nil || parsed <= 0 {
+			writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid limit"})
+			return
+		}
+		limit = parsed
+	}
+
+	if rawOffset := r.URL.Query().Get("offset"); rawOffset != "" {
+		parsed, err := strconv.Atoi(rawOffset)
+		if err != nil || parsed < 0 {
+			writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid offset"})
+			return
+		}
+		offset = parsed
+	}
+
+	if limit > 100 {
+		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "limit cannot be greated thatn 100"})
+		return
+	}
+
+	tasks, err := h.app.ListTasksPaginated(r.Context(), limit, offset)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to list tasks"})
 		return
