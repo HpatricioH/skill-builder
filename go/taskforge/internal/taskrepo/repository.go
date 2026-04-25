@@ -180,7 +180,7 @@ func (r *Repository) UpdateTitle(ctx context.Context, id int, title string) (tas
 func (r *Repository) ListPaginated(ctx context.Context, limit, offset int) ([]task.Task, error) {
 	rows, err := r.db.QueryContext(ctx, `
     SELECT id, title, completed, created_at
-		FROM task
+		FROM tasks
 		ORDER BY id ASC 
 		LIMIT ? OFFSET ?
 		`, limit, offset)

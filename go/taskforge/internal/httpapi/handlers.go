@@ -70,6 +70,7 @@ func (h *Handlers) handleListTasks(w http.ResponseWriter, r *http.Request) {
 
 	tasks, err := h.app.ListTasksPaginated(r.Context(), limit, offset)
 	if err != nil {
+		fmt.Println("list paginated error", err)
 		writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "failed to list tasks"})
 		return
 	}
